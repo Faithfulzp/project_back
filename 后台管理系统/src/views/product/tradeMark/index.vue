@@ -17,7 +17,7 @@
       <el-table-column prop="tmName" label="品牌名称" width="width">
       </el-table-column>
       <el-table-column prop="prop" label="品牌LOGO" width="width">
-        <!-- row获取的是整个data数据 ,$index是每行数据的索引-->
+        <!-- row获取的是一行的数据 ,$index是每行数据的索引-->
         <template slot-scope="{ row, $index }">
           <img :src="row.logoUrl" alt="" style="width: 100px; height: 100px" />
         </template>
@@ -28,7 +28,7 @@
             type="warning"
             icon="el-icon-edit"
             size="mini"
-            @click="updateTradeMark"
+            @click="updateTradeMark(row)"
           >
             修改
           </el-button>
@@ -61,7 +61,10 @@
     >
     </el-pagination>
     <!-- 添加修改的对话框 -->
-    <el-dialog title="添加品牌" :visible.sync="dialogFormVisible">
+    <el-dialog
+      :title="tmForm.id ? '修改品牌' : '添加品牌'"
+      :visible.sync="dialogFormVisible"
+    >
       <el-form v-model="tmForm">
         <el-form-item label="品牌名称" label-width="100px">
           <el-input
@@ -148,8 +151,10 @@ export default {
       this.dialogFormVisible = true;
     },
     // 修改一个品牌
-    updateTradeMark() {
+    updateTradeMark(row) {
       this.dialogFormVisible = true;
+      // 将当前行数据浅拷贝给tmForm显示在当前对话框
+      this.tmForm = { ...row };
     },
     // 上传图片成功后的回调：上传文件数据和展示
     handleAvatarSuccess(res, file) {
@@ -177,7 +182,11 @@ export default {
       );
       if (result.code == 200) {
         // 弹出提示信息
-        this.$message(this.tmForm.id ? "修改品牌成功" : "添加品牌成功");
+        this.$message({
+          message: this.tmForm.id ? "修改品牌成功" : "添加品牌成功",
+          type: "success",
+        });
+        this.getPageList();
       }
     },
   },
