@@ -35,9 +35,18 @@ Vue.use(ElementUI, { locale })
 
 Vue.config.productionTip = false
 
+// 全局引入api接口
+import API from "@/api";
+
 new Vue({
   el: '#app',
   router,
   store,
+  beforeCreate() {
+    // 全局事件总线
+    Vue.prototype.$bus = this;
+    // 在Vue原型上绑定API的接口，全局可用
+    Vue.prototype.$API = API;
+  },
   render: h => h(App)
 })
