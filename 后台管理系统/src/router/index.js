@@ -64,6 +64,12 @@ export const constantRoutes = [
     meta: { title: '商品管理', icon: 'el-icon-goods' },
     children: [
       {
+        path: 'trademark',
+        name: 'TradeMark',
+        component: () => import('@/views/product/tradeMark'),
+        meta: { title: '品牌管理' }
+      },
+      {
         path: 'attr',
         name: 'Attr',
         component: () => import('@/views/product/Attr'),
@@ -80,12 +86,6 @@ export const constantRoutes = [
         name: 'Sku',
         component: () => import('@/views/product/Sku'),
         meta: { title: 'Sku管理' }
-      },
-      {
-        path: 'trademark',
-        name: 'TradeMark',
-        component: () => import('@/views/product/tradeMark'),
-        meta: { title: '品牌管理' }
       },
     ]
   },

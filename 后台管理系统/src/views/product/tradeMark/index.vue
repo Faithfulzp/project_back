@@ -32,7 +32,12 @@
           >
             修改
           </el-button>
-          <el-button type="danger" icon="el-icon-delete" size="mini">
+          <el-button
+            type="danger"
+            icon="el-icon-delete"
+            size="mini"
+            @click="deleteTradeMark(row)"
+          >
             删除
           </el-button>
         </template>
@@ -65,15 +70,22 @@
       :title="tmForm.id ? '修改品牌' : '添加品牌'"
       :visible.sync="dialogFormVisible"
     >
-      <el-form v-model="tmForm">
-        <el-form-item label="品牌名称" label-width="100px">
+      <!-- 
+      表单验证必须绑定：
+      :model收集表单数据
+      :rules表单验证规则
+      ref获取表单标签
+      对每个表单中的item绑定prop，prop绑定的是data中rules中的规则
+    -->
+      <el-form :model="tmForm" :rules="rules" ref="ruleForm">
+        <el-form-item label="品牌名称" label-width="100px" prop="tmName">
           <el-input
             autocomplete="off"
             style="width: 80%"
             v-model="tmForm.tmName"
           ></el-input>
         </el-form-item>
-        <el-form-item label="品牌LOGO" label-width="100px">
+        <el-form-item label="品牌LOGO" label-width="100px" prop="logoUrl">
           <!-- action:不能用v-model获取图片数据因为不是表单元素，所以用action上传图片地址 -->
           <el-upload
             class="avatar-uploader"
@@ -104,6 +116,14 @@
 export default {
   name: "tradeMark",
   data() {
+    // 自定义表单验证规则
+    var validateTmName = (rule, value, callback) => {
+      if (value.length < 2 || value.length > 10) {
+        callback(new Error("品牌字符在2-10位"));
+      } else {
+        callback();
+      }
+    };
     return {
       page: 1, // 当前页数
       limit: 3, // 每页展示数据量
@@ -113,6 +133,22 @@ export default {
       tmForm: {
         tmName: "", //品牌标题
         logoUrl: "", //logo地址
+      },
+      // 表单验证规则
+      /*
+      required:true 必须进行验证的字段（带红*星号）
+      message：提示信息
+      trigger：用户行为设置（触发验证条件），只对表单元素生效
+      */
+      rules: {
+        // 品牌名称长度2-10
+        tmName: [
+          { required: true, message: "请输入品牌名称", trigger: "change" },
+          // 自定义表单验证
+          { validator: validateTmName },
+        ],
+        // 品牌的logo验证规则
+        logoUrl: [{ required: true, message: "请选择品牌图片" }],
       },
     };
   },
@@ -175,19 +211,55 @@ export default {
       return isJPG && isLt2M;
     },
     // 添加和修改数据点击确认后的回调：将收集的表单数据发送给服务器
-    async addOrUpdateTradeMark() {
-      this.dialogFormVisible = false;
-      let result = await this.$API.trademark.reqAddOrUpdateTradeMark(
-        this.tmForm
-      );
-      if (result.code == 200) {
-        // 弹出提示信息
-        this.$message({
-          message: this.tmForm.id ? "修改品牌成功" : "添加品牌成功",
-          type: "success",
+    addOrUpdateTradeMark() {
+      // 进行表单验证
+      this.$refs.ruleForm.validate(async (success) => {
+        if (success) {
+          this.dialogFormVisible = false;
+          let result = await this.$API.trademark.reqAddOrUpdateTradeMark(
+            this.tmForm
+          );
+          if (result.code == 200) {
+            // 弹出提示信息
+            this.$message({
+              message: this.tmForm.id ? "修改品牌成功" : "添加品牌成功",
+              type: "success",
+            });
+            this.getPageList();
+          }
+        } else {
+          console.log("error submit!!");
+          return false;
+        }
+      });
+    },
+    // 删除一个品牌
+    deleteTradeMark(row) {
+      this.$confirm(`删除品牌${row.tmName}, 是否继续?`, "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(async () => {
+          let result = await this.$API.trademark.reqDeleteTradeMark(row.id);
+          if (result.code == 200) {
+            this.$message({
+              type: "success",
+              message: "删除成功!",
+            });
+            // 重新获取数据,如果当前页删除完了要往前页跳
+            this.handlePageChange(
+              this.list.length > 1 ? this.page : this.page - 1
+            );
+            this.getPageList();
+          }
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除",
+          });
         });
-        this.getPageList();
-      }
     },
   },
 };
