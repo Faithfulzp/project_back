@@ -9,6 +9,8 @@
       align:设置单元格对齐方式
       label:设置标题内容
       width:对应列的宽度
+      prop:就是每个单元格的内容
+      row：接收的是当前行的所有数据
       每个el-table-column是一列数据
     -->
     <el-table style="width: 100%; margin-top: 10px" border :data="list">
