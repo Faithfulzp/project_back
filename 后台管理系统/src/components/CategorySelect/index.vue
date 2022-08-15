@@ -67,6 +67,7 @@ export default {
       },
     };
   },
+  // 根据商品属性的显示，控制三级分类是否显5示
   props: ["show"],
   mounted() {
     this.getCategory1List();
@@ -119,6 +120,7 @@ export default {
         console.log("三级分类数据获取失败");
       }
     },
+    // 传递第三级分类的id
     handler3() {
       this.$emit("getCategoryId", {
         categoryId: this.cForm.category3Id,
