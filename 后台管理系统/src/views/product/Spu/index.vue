@@ -3,15 +3,18 @@
     <el-card style="margin: 20px 0">
       <CategorySelect
         @getCategoryId="getCategoryId"
-        :show="!isShowTable"
+        :show="scene != 0"
       ></CategorySelect>
     </el-card>
     <el-card>
-      <div>
+      <!-- spu列表数据 -->
+      <div v-show="scene == 0">
         <el-button
           type="primary"
           icon="el-icon-plus"
           style="margin-bottom: 10px"
+          :disabled="!category3Id"
+          @click="addSpu"
           >添加SPU</el-button
         >
         <!-- prop中写了要展示的数据的话，就不能再写作用域插槽，否则内容不会显示 -->
@@ -35,6 +38,7 @@
                 icon="el-icon-edit"
                 size="mini"
                 title="修改spu"
+                @click="updateSpu(row)"
               ></el-button>
               <el-button
                 type="info"
@@ -42,12 +46,16 @@
                 size="mini"
                 title="查看当前spu全部sku列表"
               ></el-button>
-              <el-button
-                type="danger"
-                icon="el-icon-delete"
-                size="mini"
-                title="删除spu"
-              ></el-button>
+              <el-popconfirm title="确定删除吗？" @onConfirm="deleteSpu(row)">
+                <el-button
+                  type="danger"
+                  icon="el-icon-delete"
+                  size="mini"
+                  title="删除spu"
+                  slot="reference"
+                  style="margin-left: 10px"
+                ></el-button>
+              </el-popconfirm>
             </template>
           </el-table-column>
         </el-table>
@@ -64,11 +72,21 @@
         >
         </el-pagination>
       </div>
+      <!-- 添加修改Spu -->
+      <SpuForm
+        v-show="scene == 1"
+        @changeScene="changeScene"
+        ref="spu"
+      ></SpuForm>
+      <!-- 添加Sku -->
+      <SkuForm v-show="scene == 2"></SkuForm>
     </el-card>
   </div>
 </template>
 
 <script>
+import SpuForm from "./SpuForm";
+import SkuForm from "./SkuForm";
 export default {
   name: "Spu",
   data() {
@@ -76,12 +94,16 @@ export default {
       category1Id: "",
       category2Id: "",
       category3Id: "",
-      isShowTable: true, // 控制table是否显示
       page: 1, // 初始化当前页码
       limit: 3, // 初始化每页显示数据量
       total: 0, // 存储数据总数
       spuList: [], // 存储spu数据
+      scene: 0, // 0:代表战术SPU列表数据，1：添加SPU|修改SPU，2：添加SKU
     };
+  },
+  components: {
+    SpuForm,
+    SkuForm,
   },
   methods: {
     // 自定义事件的回调，修改id，最后发请求，携带三个id
@@ -119,6 +141,46 @@ export default {
     handleCurrentChange(page) {
       this.page = page;
       this.getSpuList();
+    },
+    // 添加SPU
+    addSpu() {
+      this.scene = 1;
+      // 添加的时候需要初始化品牌列表和销售商品属性的数据
+      this.$refs.spu.initAddSpuData(this.category3Id);
+    },
+    // 修改SPU，需要将当前行的spu数据传递给spuForm，通过id获取对应的spu数据
+    updateSpu(row) {
+      this.scene = 1;
+      // ref设置在子组件标签上，可以获取子组件spuForm的方法等
+      this.$refs.spu.initSpuData(row);
+    },
+    // 改变scene的值，自定义事件回调
+    changeScene({ scene, flag }) {
+      this.scene = scene;
+      // 改变scene后，得判断flag是修改还是添加,如果是修改则留在当前页，如果是添加则返回第一页，重新请求数据
+      if (flag == "添加") {
+        this.page = 1;
+        this.getSpuList();
+      } else {
+        this.getSpuList();
+      }
+    },
+    // 删除spu
+    async deleteSpu(row) {
+      let result = await this.$API.spu.reqDeleteSpu(row.id);
+      if (result.code == 200) {
+        this.$message({
+          type: "success",
+          message: "删除成功",
+        });
+        // 如果当前页数据删光了，则调到上一页
+        if (this.spuList.length > 1) {
+          this.getSpuList();
+        } else {
+          this.page = this.page - 1;
+          this.getSpuList();
+        }
+      }
     },
   },
 };
