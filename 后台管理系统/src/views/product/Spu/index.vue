@@ -32,6 +32,7 @@
                 icon="el-icon-plus"
                 size="mini"
                 title="添加sku"
+                @click="addSku(row)"
               ></el-button>
               <el-button
                 type="warning"
@@ -75,11 +76,15 @@
       <!-- 添加修改Spu -->
       <SpuForm
         v-show="scene == 1"
-        @changeScene="changeScene"
+        @changeSceneTo1="changeSceneTo1"
         ref="spu"
       ></SpuForm>
       <!-- 添加Sku -->
-      <SkuForm v-show="scene == 2"></SkuForm>
+      <SkuForm
+        v-show="scene == 2"
+        @changeSceneTo2="changeSceneTo2"
+        ref="sku"
+      ></SkuForm>
     </el-card>
   </div>
 </template>
@@ -154,8 +159,8 @@ export default {
       // ref设置在子组件标签上，可以获取子组件spuForm的方法等
       this.$refs.spu.initSpuData(row);
     },
-    // 改变scene的值，自定义事件回调
-    changeScene({ scene, flag }) {
+    // spuForm改变scene的值，自定义事件回调
+    changeSceneTo1({ scene, flag }) {
       this.scene = scene;
       // 改变scene后，得判断flag是修改还是添加,如果是修改则留在当前页，如果是添加则返回第一页，重新请求数据
       if (flag == "添加") {
@@ -164,6 +169,10 @@ export default {
       } else {
         this.getSpuList();
       }
+    },
+    // skuForm改变scene的值，自定义事件回调
+    changeSceneTo2(scene) {
+      this.scene=scene;
     },
     // 删除spu
     async deleteSpu(row) {
@@ -181,6 +190,13 @@ export default {
           this.getSpuList();
         }
       }
+    },
+    // 切换至商品添加sku属性
+    addSku(row) {
+      // 改变scene
+      this.scene = 2;
+      // 调用方法请求数据，将id都携带过去，row中有category3Id
+      this.$refs.sku.getSkuData(this.category1Id, this.category2Id, row);
     },
   },
 };

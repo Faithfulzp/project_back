@@ -290,7 +290,7 @@ export default {
           message: "保存成功",
         });
         // 保存完毕需要跳转到主页面即scene=0,判断是否为修改或添加
-        this.$emit("changeScene", {
+        this.$emit("changeSceneTo1", {
           scene: 0,
           flag: this.spu.id ? "修改" : "添加",
         });
@@ -302,7 +302,7 @@ export default {
     },
     // 取消按钮
     cancel() {
-      this.$emit("changeScene", {
+      this.$emit("changeSceneTo1", {
         scene: 0,
         flag: "",
       });
