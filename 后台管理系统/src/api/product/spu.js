@@ -32,5 +32,7 @@ export const reqSpuSaleAttrList = (spuId) => request({ url: `/admin/product/spuS
 export const reqAttrInfoList = (category1Id, category2Id, category3Id) => request({ url: `/admin/product/attrInfoList/${category1Id}/${category2Id}/${category3Id}`, method: 'get' });
 // 添加sku /admin/product/saveSkuInfo post
 export const reqAddSku = (data) => request({ url: "/admin/product/saveSkuInfo", method: 'post', data });
+// 获取sku列表数据的接口 /admin/product/findBySpuId/{spuId} get
+export const reqSkuList = (spuId) => request({ url: `/admin/product/findBySpuId/${spuId}`, method: "get" });
 
 

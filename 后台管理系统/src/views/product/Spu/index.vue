@@ -46,6 +46,7 @@
                 icon="el-icon-info"
                 size="mini"
                 title="查看当前spu全部sku列表"
+                @click="checkSkuList(row)"
               ></el-button>
               <el-popconfirm title="确定删除吗？" @onConfirm="deleteSpu(row)">
                 <el-button
@@ -86,6 +87,29 @@
         ref="sku"
       ></SkuForm>
     </el-card>
+    <!-- 显示sku列表 -->
+    <el-dialog
+      :title="`${spu.spuName}的sku列表`"
+      :visible.sync="dialogTableVisible"
+    >
+      <el-table :data="skuList" style="width: 100%" border>
+        <el-table-column prop="skuName" label="名称" width="width">
+        </el-table-column>
+        <el-table-column prop="price" label="价格" width="width">
+        </el-table-column>
+        <el-table-column prop="weight" label="重量" width="width">
+        </el-table-column>
+        <el-table-column prop="prop" label="默认图片" width="width">
+          <template slot-scope="{ row, $index }">
+            <img
+              :src="row.skuDefaultImg"
+              alt=""
+              style="width: 100px; height: 100px"
+            />
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-dialog>
   </div>
 </template>
 
@@ -104,6 +128,9 @@ export default {
       total: 0, // 存储数据总数
       spuList: [], // 存储spu数据
       scene: 0, // 0:代表战术SPU列表数据，1：添加SPU|修改SPU，2：添加SKU
+      skuList: [], //保存sku数据
+      spu: {}, //保存当前行的spu数据
+      dialogTableVisible: false, // 控制sku列表窗口显示
     };
   },
   components: {
@@ -172,7 +199,7 @@ export default {
     },
     // skuForm改变scene的值，自定义事件回调
     changeSceneTo2(scene) {
-      this.scene=scene;
+      this.scene = scene;
     },
     // 删除spu
     async deleteSpu(row) {
@@ -197,6 +224,17 @@ export default {
       this.scene = 2;
       // 调用方法请求数据，将id都携带过去，row中有category3Id
       this.$refs.sku.getSkuData(this.category1Id, this.category2Id, row);
+    },
+    // 查看商品的sku列表
+    async checkSkuList(row) {
+      // 显示窗口
+      this.dialogTableVisible = true;
+      // 保存当前行数据
+      this.spu = row;
+      let result = await this.$API.spu.reqSkuList(row.id);
+      if ((result.code = 200)) {
+        this.skuList = result.data;
+      }
     },
   },
 };
