@@ -91,8 +91,9 @@
     <el-dialog
       :title="`${spu.spuName}的sku列表`"
       :visible.sync="dialogTableVisible"
+      :before-close="closeDialog"
     >
-      <el-table :data="skuList" style="width: 100%" border>
+      <el-table :data="skuList" style="width: 100%" border v-loading="loading">
         <el-table-column prop="skuName" label="名称" width="width">
         </el-table-column>
         <el-table-column prop="price" label="价格" width="width">
@@ -116,6 +117,7 @@
 <script>
 import SpuForm from "./SpuForm";
 import SkuForm from "./SkuForm";
+import { done } from "nprogress";
 export default {
   name: "Spu",
   data() {
@@ -131,6 +133,7 @@ export default {
       skuList: [], //保存sku数据
       spu: {}, //保存当前行的spu数据
       dialogTableVisible: false, // 控制sku列表窗口显示
+      loading: true, //sku列表数据出现前的加载效果
     };
   },
   components: {
@@ -234,7 +237,19 @@ export default {
       let result = await this.$API.spu.reqSkuList(row.id);
       if ((result.code = 200)) {
         this.skuList = result.data;
+        // 关闭加载动画
+        this.loading = false;
       }
+    },
+    // sku列表关闭前的回调
+    closeDialog(done) {
+      // 重置loading
+      this.loading = true;
+      // 防止查看下一个sku列表时，上一个sku的列表数据会短暂出现
+      // 因此窗口关闭前先清空显示的数据，下一次点击再请求数据
+      this.skuList = [];
+      // 关闭对话框
+      done();
     },
   },
 };
