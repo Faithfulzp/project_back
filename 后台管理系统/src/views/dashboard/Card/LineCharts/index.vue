@@ -5,7 +5,7 @@
 <script>
 import * as echarts from "echarts";
 export default {
-  name: "lineCard",
+  name: "LineCharts",
   mounted() {
     // 初始化echarts实例
     let lineCharts = echarts.init(this.$refs.lineCharts);
