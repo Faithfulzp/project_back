@@ -2,7 +2,6 @@
   <div>
     <el-card class="box-card" style="margin: 10px 0">
       <div slot="header" class="clearfix">
-        <!-- @tab-click="handleClickTab" -->
         <!-- tab标签页内容 -->
         <el-tabs v-model="activeName" class="tabs" @tab-click="handleClickTab">
           <el-tab-pane label="销售额" name="sale"> </el-tab-pane>
@@ -31,8 +30,8 @@
           >
           </el-date-picker>
         </div>
-        <!-- tab的内容（不放在el-tab-pane）-->
       </div>
+      <!-- tab的内容（不放在el-tab-pane）-->
       <div>
         <!-- v-if判断点击的tab -->
         <el-row :gutter="10">
@@ -98,7 +97,7 @@ export default {
       rankName: "销售额",
       // 收集日期
       date: [],
-      // 图表
+      // 图表，可全局调用
       mycharts: null,
     };
   },
@@ -158,6 +157,7 @@ export default {
     });
   },
   computed: {
+    // 图表标题
     title() {
       return this.activeName == "sale" ? "销售额" : "访问量";
     },
@@ -195,13 +195,14 @@ export default {
     },
   },
   watch: {
+    // 监听title的变化，其实就是监听是否切换tab
     title() {
       // tab标签页改变，判断标签页name，并获取已经存在的初始化过的配置,修改其中的数据，再重新进行配置可以避免每切换tab都要初始化echarts
       if (this.activeName == "visits") {
         this.rankName = "访问量";
         this.mycharts.setOption({
           title: {
-            text: this.title+'趋势',
+            text: this.title + "趋势",
           },
           series: [
             {
@@ -214,7 +215,7 @@ export default {
         this.rankName = "销售额";
         this.mycharts.setOption({
           title: {
-            text: this.title+'趋势',
+            text: this.title + "趋势",
           },
           series: [
             {
