@@ -30,6 +30,7 @@ import Layout from '@/layout'
  * a base page that does not have permission requirements
  * all roles can be accessed
  */
+// 常量路由：不管什么用户都可以查看的路由
 export const constantRoutes = [
   {
     path: '/login',
@@ -55,6 +56,9 @@ export const constantRoutes = [
       meta: { title: '首页', icon: 'dashboard' }
     }]
   },
+]
+// 异步路由：不同的用户，需要有权限过滤的路由
+export const asyncRoutes = [
   {
     // 这些都是侧边栏路由，所以都在首页
     path: '/product',
@@ -89,11 +93,12 @@ export const constantRoutes = [
       },
     ]
   },
-
+]
+// 任意路由：当路径出现错误是都重定向404
+export const anyRoutes = [
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
 ]
-
 const createRouter = () => new Router({
   // mode: 'history', // require service support
   scrollBehavior: () => ({ y: 0 }),
